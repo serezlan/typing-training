@@ -32,12 +32,36 @@ def get_repetition_count():
             continue
 
 
+def update_record(record, target_word, hit):
+    if target_word not in record:
+        record[target_word] = {"hit": 1, "missed": 0}
+        return
+
+    if hit == True:
+        record[target_word]["hit"] = record[target_word]["hit"] + 1
+    else:
+        record[target_word]["missed"] = record[target_word]["missed"] + 1
+
+
+def print_record(record):
+    for word in record:
+        hit = record[word]["hit"]
+        missed = record[word]["missed"]
+        total = hit + missed
+        print(
+            "{} success rate {:.2f}% {}/{}".format(
+                word, 100.0 * hit / total, hit, total
+            )
+        )
+
+
 def main():
     voxin = Voxin()
     counter = 0
     max_counter = get_repetition_count()
     word_list = load_word_list()
     target_word = random.choice(word_list)
+    record = {}
     print(
         "Type the following word(s). If you've typed {} times correctly, you will be presented with new challenge".format(
             max_counter
@@ -55,9 +79,11 @@ def main():
 
         if word == target_word:
             pa.playsound("open-object.wav")
+            update_record(record, target_word, True)
             counter = counter + 1
         else:
             counter = 0
+            update_record(record, target_word, False)
             pa.playsound("off.wav")
 
         if counter == max_counter:
@@ -70,6 +96,7 @@ def main():
             continue
 
     voxin.close()
+    print_record(record)
 
 
 if __name__ == "__main__":
